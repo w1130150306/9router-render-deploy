@@ -22,4 +22,4 @@ fi
 ) &
 
 echo "==> Starting 9router..."
-exec /entrypoint.sh node /app/custom-server.js
+exec node /app/custom-server.js
