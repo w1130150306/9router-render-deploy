@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 GIT_REPO="https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/${GIT_USERNAME}/9router-data.git"
 
 if [ ! -f /app/data/.git/config ]; then
-    echo "Cloning config repo..."
-    rm -rf /app/data/*
+    echo "==> Cloning 9router-data config repo..."
+    rm -rf /app/data/* /app/data/.[!.]*
     git clone "$GIT_REPO" /app/data
 fi
 
@@ -21,5 +21,5 @@ fi
     done
 ) &
 
-echo "Starting 9router..."
-DATA_DIR=/app/data node /app/server.js
+echo "==> Starting 9router..."
+exec /entrypoint.sh node /app/custom-server.js
