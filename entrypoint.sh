@@ -3,9 +3,11 @@ set -e
 
 GIT_REPO="https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/${GIT_USERNAME}/9router-data.git"
 
-# 配置 git identity（缺少这个会导致 git commit 失败！）
-git config --global user.name "9router-sync"
-git config --global user.email "9router@sync.local"
+# 用环境变量设置 git identity，不依赖 ~/.gitconfig
+export GIT_AUTHOR_NAME="9router-sync"
+export GIT_AUTHOR_EMAIL="9router@sync.local"
+export GIT_COMMITTER_NAME="9router-sync"
+export GIT_COMMITTER_EMAIL="9router@sync.local"
 
 if [ ! -f /app/data/.git/config ]; then
     echo "==> Cloning 9router-data config repo..."
@@ -13,7 +15,6 @@ if [ ! -f /app/data/.git/config ]; then
     git clone "$GIT_REPO" /app/data
 fi
 
-# 后台自动同步：每 60 秒检查一次，确保数据及时推送
 (
     while true; do
         sleep 60
