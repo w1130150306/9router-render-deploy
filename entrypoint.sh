@@ -3,7 +3,6 @@ set -e
 
 GIT_REPO="https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/${GIT_USERNAME}/9router-data.git"
 
-# 用环境变量设置 git identity，不依赖 ~/.gitconfig
 export GIT_AUTHOR_NAME="9router-sync"
 export GIT_AUTHOR_EMAIL="9router@sync.local"
 export GIT_COMMITTER_NAME="9router-sync"
@@ -19,11 +18,23 @@ fi
     while true; do
         sleep 60
         cd /app/data
+
         if [ -n "$(git status --porcelain)" ]; then
             echo "==> Syncing config changes to GitHub..."
-            git add -A
-            git commit -m "auto-sync $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-            git push "$GIT_REPO" main
+            git add -A || { echo "ERROR: git add failed"; continue; }
+            git commit -m "auto-sync $(date -u +"%Y-%m-%d %H:%M:%S UTC")" || { echo "ERROR: git commit failed"; continue; }
+
+            git pull "$GIT_REPO" main --rebase --autostash 2>/dev/null || echo "WARN: git pull failed, trying push anyway"
+
+            for i in 1 2 3; do
+                if git push "$GIT_REPO" main 2>/dev/null; then
+                    echo "==> Push succeeded (attempt $i)"
+                    break
+                else
+                    echo "WARN: git push attempt $i failed, retrying in 10s..."
+                    sleep 10
+                fi
+            done
         fi
     done
 ) &
