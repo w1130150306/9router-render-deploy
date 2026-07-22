@@ -16,7 +16,7 @@ fi
 
 (
     while true; do
-        sleep 60
+        sleep 7200
         cd /app/data
 
         if [ -n "$(git status --porcelain)" ]; then
